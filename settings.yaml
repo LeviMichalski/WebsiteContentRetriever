@@ -1,4 +1,0 @@
-
-# Overwrite data in columns that have been previously populated. Will only populate
-# if no content exists within a cell.
-overwrite-content: false

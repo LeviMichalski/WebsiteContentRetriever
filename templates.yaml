@@ -1,4 +1,3 @@
-
 # Template Field Defaults
 #   source: gets the <title> from the root domain home page
 #   source-type: searches the source URL for terms like "news", "blog", and defaults to "website"
@@ -9,35 +8,30 @@
 #   link-status: validates that the FMI link is active (HTTP 200)
 #   link-location: <blank>
 
-templates:
-
-  press-releases:
-    match:
-      search: Source URL
-      contains: prnewswire.com
-    template:
-      source: PR News Wire
-      source-type: Press Release
-      association: No
-      source-sector: News
-
-  fmi-home-page:
-    match:
-      search: URL In Source Content
-      contains: fminet.com$, fminet.com/$
-    template:
-      link-location: Homepage
-
-  fmi-2018-report:
-    match:
-      search: URL In Source Content
-      contains: https://www.fminet.com/wp-content/uploads/2018/04/MATrendsReport_2018_FINAL.pdf
-    template:
-      fmi-content-type: Special Report
-      fmi-content-title: 2017 FMI/BIM Forum Prefabrication Survey
-      link-location: Final report PDF
-
-fmi-default:
-    match:
-      search: URL In Source Content
-      contains: fminet.com
+- name: Press Releases
+  search:
+    type: Source URL
+    contains: prnewswire.com
+  template:
+    source: PR News Wire
+    source-type: Press Release
+    association: No
+    source-sector: News
+- name: FMI Home Page
+  search:
+    type: URL In Source Content
+    contains: fminet.com$, fminet.com/$
+  template:
+    link-location: Homepage
+- name: FMI 2018 Report
+  search:
+    type: URL In Source Content
+    contains: https://www.fminet.com/wp-content/uploads/2018/04/MATrendsReport_2018_FINAL.pdf
+  template:
+    fmi-content-type: Special Report
+    fmi-content-title: 2017 FMI/BIM Forum Prefabrication Survey
+    link-location: Final report PDF
+- name: DEFAULT
+  search:
+    type: URL In Source Content
+    contains: fminet.com
