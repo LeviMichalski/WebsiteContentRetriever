@@ -23,7 +23,7 @@ def get_content_templates(file_name):
 
 
 def get_root_domain_url(url):
-    regex_root_domain_pattern = 'https*://.*\.\w\w(\w*)/'
+    regex_root_domain_pattern = 'https*://.*\.\w\w(\w*)(:\d\d(\d*))*/'
     regex_root_domain = re.compile(regex_root_domain_pattern, re.IGNORECASE)
     return regex_root_domain.search(url).group()
 

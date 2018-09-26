@@ -7,6 +7,7 @@
 #   fmi-content-title: <blank>
 #   link-status: validates that the FMI link is active (HTTP 200)
 #   link-location: <blank>
+#   keywords: get from website content (look up the standard way of adding keywords)
 
 - name: Press Releases
   search:
@@ -42,7 +43,6 @@
     fmi-content-type: Special Report
     fmi-content-title: "A New Era for Modular Design and Construction"
     link-location: Final report PDF
-
 
 - name: Millennials in Construction - Special Report
   search:
