@@ -1,4 +1,4 @@
-# Template Field Defaults
+# Template 'meta' defaults
 #   source: gets the <title> from the root domain home page
 #   source-type: searches the source URL for terms like "news", "blog", and defaults to "website"
 #   association: no
@@ -13,7 +13,7 @@
   search:
     type: Source URL
     contains: prnewswire.com
-  template:
+  meta:
     source: PR News Wire
     source-type: Press Release
     association: No
@@ -21,48 +21,50 @@
 
 - name: FMI Home Page
   search:
-    type: URL In Source Content
+    type: Website Link
     contains: fminet.com$, fminet.com/$
-  template:
+  meta:
     link-location: Homepage
 
 - name: 2018 FMI Overview
   search:
-    type: URL In Source Content
+    type: Website Link
     contains: https://www.fminet.com/wp-content/uploads/2018/01/Overview2018_FINAL.pdf
-  template:
+  meta:
     fmi-content-type: Special Report
     fmi-content-title: 2018 FMI Overview
     link-location: Final report PDF
 
 - name: A New Era For Modular Design And Construction
   search:
-    type: URL In Source Content
+    type: Website Link
     contains: https://www.fminet.com/wp-content/uploads/2018/04/FMI-Modularization-Summit-2018_FINAL.pdf
-  template:
+  meta:
     fmi-content-type: Special Report
     fmi-content-title: "A New Era for Modular Design and Construction"
     link-location: Final report PDF
 
 - name: Millennials in Construction - Special Report
   search:
-    type: URL In Source Content
+    type: Website Link
     contains: https://www.fminet.com/special-reports/millennials-in-construction-learning-to-engage-a-new-workforce/
-  template:
+  meta:
     fmi-content-type: Special Report
     fmi-content-title: "Millennials in Construction: Learning To Engage A New Workforce"
     link-location: Website
 
 - name: Millennials in Construction - PDF
   search:
-    type: URL In Source Content
+    type: Website Link
     contains: http://lp.fminet.com/rs/583-MEF-388/images/MillenialsSurveyReport2015_FINAL.pdf
-  template:
+  meta:
     fmi-content-type: Special Report
     fmi-content-title: "Millennials in Construction: Learning To Engage A New Workforce"
     link-location: Final report PDF
 
 - name: DEFAULT
   search:
-    type: URL In Source Content
+    type: Website Link
     contains: fminet.com
+  meta:
+

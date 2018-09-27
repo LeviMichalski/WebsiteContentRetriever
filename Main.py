@@ -1,7 +1,8 @@
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-# Website Content Retriever
+# Website References Lookup
 #
-# Examines a source URL to determine which type of content that it's referencing.
+# Examines a website reference URL to determine which type of content that it's referencing and the links that are
+# being referenced. Includes a template engine that will determine meta data for each reference based on the URLs.
 #
 # Authors: Levi Michalski, Tim Michalski
 # License: Apache 2.0
@@ -23,28 +24,21 @@
 
 
 import sys
-import search
 import time
-import data_access
+import file_io
+import website_meta
 
-# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-# Application Parameters
-# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-COLUMN_TITLE = 1
-COLUMN_URL = 2
-TEMPLATES_CONFIG_FILE = 'templates.yaml'
-
-HTTP_STATUS_OK = 200
-HTTP_STATUS_FORBIDDEN = 403
-HTTP_STATUS_NOT_FOUND = 404
 
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 # Welcome Message
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 print()
-print('Website Content Retriever 1.0')
+print('Website References Lookup 1.0')
 print(' - Authors: Levi Michalski, Tim Michalski')
 print()
+
+start_time = time.time()
+
 
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 # Command Line Arguments
@@ -56,82 +50,44 @@ if len(sys.argv) == 1:
 
 website_references_file = sys.argv[1]
 
-# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-# Load Reference Templates
-#
-# These templates will be used to determine how to fill in the columns of data associated with each website
-# reference record.
-# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-templates = data_access.get_content_templates(TEMPLATES_CONFIG_FILE)
-
-# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-# Load Reference Templates
-# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-website_references = data_access.get_website_references(website_references_file)
 
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 # Process Website References
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-start_time = time.time()
+_TITLE = 1
 
-for index, website_reference in enumerate(website_references):
-    title = website_reference[COLUMN_TITLE]
-    url = website_reference[COLUMN_URL]
+record_count = 0
+website_meta_results = []
 
-    print(str(index+1) + '. ' + title)
-    print('      URL: ' + url)
+website_references = file_io.get_website_references(website_references_file)
+for website_reference in website_references:
 
-    # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-    # Fetch the company name from the root domain page title
-    # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-    root_domain_url = data_access.get_root_domain_url(url)
-    root_domain_attributes = data_access.get_website_attributes(root_domain_url)
-    if root_domain_attributes.get('title'):
-        print('      ' + root_domain_attributes.get('title'))
-    else:
-        print('       No website source title found')
+    # Print the record number and title to the console
+    record_count += 1
+    print(str(record_count) + '. ' + website_reference[_TITLE])
 
-    # examine templates
-    template_matched = False
-    for template in templates:
-        if template_matched:
-            break
-
-        # Source URL
-        if 'Source URL' == template['search']['type']:
-            url_search_criteria = template['search']['contains']
-            if search.find_text(url, url_search_criteria):
-                print('      ' + template['name'] + ' match')
-                template_matched = True
-
-        elif 'URL In Source Content' == template['search']['type']:
-            url_search_criteria = template['search']['contains']
-
-            website_attributes = data_access.get_website_attributes(url)
-            if HTTP_STATUS_OK == website_attributes['status_code']:
-                if website_attributes.get('links'):
-                    for link in website_attributes.get('links'):
-                        if search.find_text(link, url_search_criteria):
-                            print('      ' + template['name'] + ': ' + link)
-                            template_matched = True
-
-            elif HTTP_STATUS_NOT_FOUND == website_attributes['status_code']:
-                print('      CHECK MANUALLY: The URL no longer exists or is not accessible.')
-                template_matched = True
-
-            elif HTTP_STATUS_FORBIDDEN == website_attributes['status_code']:
-                print('      CHECK MANUALLY: This link is blocking this program. Verify manually.')
-                template_matched = True
-
-            else:
-                print('      LINK ERROR: Link not accessible for some reason (HTTP status code = ' + str(website_attributes['status_code']) + ')')
-                template_matched = True
-
-    if not template_matched:
-        print('      NO MATCH')
-
+    # Look up the meta data for the website reference
+    results = website_meta.lookup(website_reference)
+    for result in results:
+        print('     ' + str(result))
     print()
 
+    # Append the results (could be more then 1 row) to the master list
+    website_meta_results.extend(results)
 
+
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+# Export Results to CSV
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+# TODO generate a new CSV file name from the given name
+print('Writing results to ' + 'test-results.csv')
+
+# TODO Write the results to the CSV file
+# file_io.csv_export(website_meta_results)
+
+
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+# Elapsed time
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 elapsed_time = round((time.time() - start_time)/60, 1)  # minutes rounded to the nearest tenth
 print('Website references processed in ' + str(elapsed_time) + ' minutes')
