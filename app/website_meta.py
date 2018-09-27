@@ -1,17 +1,21 @@
-import web_io
-import templates
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+# website_meta.py
+#
+# Gathers all necessary meta data relating to a website referral, including static
+# data from the built-in template engine (template_engine.py).
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+from app import web_io
+from app import template_engine
 
-WEBSITE_REFERENCE_COL_URL = 2
+WEBSITE_REFERRAL_COL_URL = 2
 
 
-def lookup(website_reference):
+def lookup(website_referral):
     # Get the Website Source URL
-    website_url = website_reference[WEBSITE_REFERENCE_COL_URL]
+    website_url = website_referral[WEBSITE_REFERRAL_COL_URL]
 
-    # Find the template(s) that matched the URL
-    website_meta_records = templates.find_matches(website_url)
-
-    # If no templates are found for the URL, then return an error
+    # Get static meta data from the template engine
+    website_meta_records = template_engine.find_matches(website_url)
     if not website_meta_records:
         return [{
             'url': website_url,

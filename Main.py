@@ -1,8 +1,8 @@
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-# Website References Lookup
+# Website Referral Lookup (Main.py)
 #
-# Examines a website reference URL to determine which type of content that it's referencing and the links that are
-# being referenced. Includes a template engine that will determine meta data for each reference based on the URLs.
+# Examines a website referral URL to determine which type of content that it's referencing and the links that are
+# being referenced. Includes a template engine that will determine meta data for each referral based on the URLs.
 #
 # Authors: Levi Michalski, Tim Michalski
 # License: Apache 2.0
@@ -25,15 +25,14 @@
 
 import sys
 import time
-import file_io
-import website_meta
-
+from app import file_io
+from app import website_meta
 
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 # Welcome Message
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 print()
-print('Website References Lookup 1.0')
+print('Website Referral Lookup 1.0')
 print(' - Authors: Levi Michalski, Tim Michalski')
 print()
 
@@ -48,32 +47,30 @@ if len(sys.argv) == 1:
     print("Example: Main.py sample-content/demo-content.csv")
     quit()
 
-website_references_file = sys.argv[1]
+website_referrals_file = sys.argv[1]
 
 
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-# Process Website References
+# Process Website Referrals
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
 _TITLE = 1
 
 record_count = 0
-website_meta_results = []
+website_referral_results = []
+website_referrals = file_io.get_csv(website_referrals_file)
 
-website_references = file_io.get_website_references(website_references_file)
-for website_reference in website_references:
-
-    # Print the record number and title to the console
+for website_referral in website_referrals:
     record_count += 1
-    print(str(record_count) + '. ' + website_reference[_TITLE])
+    print(str(record_count) + '. ' + website_referral[_TITLE])
 
-    # Look up the meta data for the website reference
-    results = website_meta.lookup(website_reference)
+    results = website_meta.lookup(website_referral)
     for result in results:
         print('     ' + str(result))
     print()
 
     # Append the results (could be more then 1 row) to the master list
-    website_meta_results.extend(results)
+    website_referral_results.extend(results)
 
 
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
@@ -83,11 +80,11 @@ for website_reference in website_references:
 print('Writing results to ' + 'test-results.csv')
 
 # TODO Write the results to the CSV file
-# file_io.csv_export(website_meta_results)
+# file_io.csv_export(website_referral_results)
 
 
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 # Elapsed time
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 elapsed_time = round((time.time() - start_time)/60, 1)  # minutes rounded to the nearest tenth
-print('Website references processed in ' + str(elapsed_time) + ' minutes')
+print('Website referrals processed in ' + str(elapsed_time) + ' minutes')
