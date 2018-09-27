@@ -37,5 +37,3 @@ def lookup(website_referral):
         #   TODO keywords: get from website content (look up the standard way of adding keywords)
 
     return website_meta_records
-
-

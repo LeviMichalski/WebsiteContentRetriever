@@ -4,6 +4,7 @@
 # Contains the logic for accessing and parsing websites for information
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 import re
+from requests import RequestException
 from requests_html import HTMLSession
 
 
@@ -29,7 +30,16 @@ def get_website_source(url):
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 def get_website(url):
     session = HTMLSession()
-    page = session.get(url)
+
+    try:
+        page = session.get(url)
+    except RequestException as err:
+        print('     ' + str(err))
+        return {
+            'status_code': 500,
+            'title': '',
+            'links': []
+        }
 
     attributes = {
         'status_code': page.status_code

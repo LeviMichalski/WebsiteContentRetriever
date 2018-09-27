@@ -59,7 +59,7 @@ def _get_website_link_matches(url):
     website_link_templates = _get_templates(_TEMPLATE_WEBSITE_LINK)
 
     source_website = web_io.get_website(url)
-    website_links = source_website['links']
+    website_links = source_website.get('links')
 
     for website_link in website_links:
         match = _match(website_link_templates, website_link)

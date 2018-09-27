@@ -13,7 +13,7 @@ setup(
     license='APACHE 2.0',
     description='Looks up meta data for a list of website referrals (aka hits)',
     long_description=open('README.md').read(),
-    install_requires=['PyYAML', 'requests_html'],
+    install_requires=['PyYAML', 'requests_html', 'requests'],
     url='https://github.com/LeviMichalski/WebsiteContentRetriever',
     author='Levi Michalski',
     author_email='levitmichalski@gmail.com'
