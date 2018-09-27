@@ -1,82 +1,90 @@
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+# Website Referral Lookup (Main.py)
+#
+# Examines a website referral URL to determine which type of content that it's referencing and the links that are
+# being referenced. Includes a template engine that will determine meta data for each referral based on the URLs.
+#
+# Authors: Levi Michalski, Tim Michalski
+# License: Apache 2.0
+# GitHub: https://github.com/LeviMichalski/WebsiteContentRetriever
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-####
+
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # !! WARNING !!   -- Tim Michalski  9/24/2018
-# A known issue exists where this program will fail when a CSV file contains Microsoft specific double quote characters.
+# A known issue exists where this program will fail when a CSV file contains
+# Microsoft specific double quote characters.
+#
 # For example: “Musts”
-# The begin and end quotes are not unicode and will throw an exception. Before creating a CSV file, consider doing a
-# find and replace on the file for these begin and end quotes and replace with a single quote like '
+#
+# The begin and end quotes are not unicode and will throw an exception. Before
+# creating a CSV file, consider doing a find and replace on the file for these
+# begin and end quotes and replace with a single quote like '
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 
-
-
-
-#     1. Setup - load config/template files
-
-# import the YAML library
-# open the settings.yaml file
-# read the single setting in the file
-# close the settings.yaml file
-
-
-#     2. Load the CSV with URLs & content
-
-# a. import a CSV reader
-
-# b. input parameter to get the name of the file
-#   python Main.py my-file.csv
-
-# c. validate the columns of the file
-#       - does it have a URL column?
-#       - does it have all of the other required columns?
-
-
-#     3. Iterate through the URLs & execute the templates
-
-# a. for each CSV row, get the URL
-
-# b. iterate through each of the templates to see if the MATCH is TRUE
-#   If so, then complete the template fields
-
-# c. write the template field content to a new CSV file
-#   my-file-retrieved-2018-09-23-1553.csv
-
-# d. close the files and exit
-
-# 4. Create functions to dynamically lookup a few of the template fields (source, source type)
-
-import csv
 import sys
-from requests_html import HTMLSession
+import time
+from app import file_io
+from app import website_meta
+
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+# Welcome Message
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+print()
+print('Website Referral Lookup 1.0')
+print(' - Authors: Levi Michalski, Tim Michalski')
+print()
+
+start_time = time.time()
 
 
-def find_links(links, domain):
-    matched_links = []
-    for link in links:
-        if link.lower().find(domain.lower()) > -1:
-            matched_links.append(link)
-
-    return matched_links
-
-
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+# Command Line Arguments
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 if len(sys.argv) == 1:
     print("ERROR: Please enter the name of the .CSV file to process.")
     print("Example: Main.py sample-content/demo-content.csv")
     quit()
 
-with open(sys.argv[1], 'r') as csv_file:
-    reader = csv.reader(csv_file)
-    myList = list(reader)
+website_referrals_file = sys.argv[1]
 
-    # remove the title row
-    myList.pop(0)
 
-for row in myList:
-    url = row[2]
-    print(url)
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+# Process Website Referrals
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-    session = HTMLSession()
-    page = session.get(url)
+_TITLE = 1
 
-    links = find_links(page.html.links, 'fminet.com')
-    print(links)
+record_count = 0
+website_referral_results = []
+website_referrals = file_io.get_csv(website_referrals_file)
+
+for website_referral in website_referrals:
+    record_count += 1
+    print(str(record_count) + '. ' + website_referral[_TITLE])
+
+    results = website_meta.lookup(website_referral)
+    for result in results:
+        print('     ' + str(result))
     print()
+
+    # Append the results (could be more then 1 row) to the master list
+    website_referral_results.extend(results)
+
+
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+# Export Results to CSV
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+# TODO generate a new CSV file name from the given name
+print('Writing results to ' + 'test-results.csv')
+
+# TODO Write the results to the CSV file
+# file_io.csv_export(website_referral_results)
+
+
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+# Elapsed time
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+elapsed_time = round((time.time() - start_time)/60, 1)  # minutes rounded to the nearest tenth
+print('Website referrals processed in ' + str(elapsed_time) + ' minutes')
