@@ -30,11 +30,11 @@ with open('./app/templates.yaml', 'r') as templates_file:
 # method could return multiple matches if the template type 'Website Link' finds
 # multiple website links that match.
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-def find_matches(url):
-    matches = _get_source_url_matches(url)
+def find_matches(url, meta_prefix):
+    matches = _get_source_url_matches(url, meta_prefix)
 
     if not matches:
-        matches = _get_website_link_matches(url)
+        matches = _get_website_link_matches(url, meta_prefix)
 
     return matches
 
@@ -44,14 +44,14 @@ def find_matches(url):
 # These functions should only be used within this file
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-def _get_source_url_matches(url):
+def _get_source_url_matches(url, meta_prefix):
     source_url_templates = _get_templates(_TEMPLATE_SOURCE_URL)
-    match = _match(source_url_templates, url)
-    if match:
-        return [match]  # Return as a list
+    template_meta = _match(source_url_templates, url, meta_prefix)
+    if template_meta:
+        return [template_meta]  # Return as a list
 
 
-def _get_website_link_matches(url):
+def _get_website_link_matches(url, meta_prefix):
     # Fetch the links within the source URL website. Each link found will be examined by the
     # templates for a match. If there are multiple links that match a template, then append the
     # link to another match of the same template type, otherwise create a new matched template entry.
@@ -62,13 +62,13 @@ def _get_website_link_matches(url):
     website_links = source_website.get('links')
 
     for website_link in website_links:
-        match = _match(website_link_templates, website_link)
-        if match:
-            # TODO: append to an existing record if the template is the same
-            match['url'] = url
-            match['url_status'] = source_website.get('status_code')
-            match['fmi_link'] = website_link
-            matches.append(match)
+        template_meta = _match(website_link_templates, website_link, meta_prefix)
+        if template_meta:
+            # TODO: append the 'fmi_link' to an existing record if the template is the same
+            template_meta['url_status'] = source_website.get('status_code')
+            template_meta['fmi_link'] = website_link
+            template_meta['fmi_link_status'] = web_io.get_website_status(website_link)
+            matches.append(template_meta)
 
     return matches
 
@@ -81,13 +81,11 @@ def _get_templates(template_name):
     return templates
 
 
-def _match(templates, url):
+def _match(templates, url, meta_prefix):
     for template in templates:
         search_criteria = template['search']['contains'].split(',')
         if _search(url, search_criteria):
-            match = {
-                'url': url
-            }
+            match = {**meta_prefix}
 
             if template.get('meta'):
                 match['source'] = template['meta'].get('source')

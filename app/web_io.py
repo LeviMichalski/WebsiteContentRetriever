@@ -66,3 +66,16 @@ def get_website(url):
         attributes['links'] = []
 
     return attributes
+
+
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+# Get Website Status
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+def get_website_status(url):
+    session = HTMLSession()
+    try:
+        page = session.get(url)
+    except RequestException as err:
+        500
+
+    return page.status_code
