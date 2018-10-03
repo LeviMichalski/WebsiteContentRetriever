@@ -117,4 +117,34 @@ Basic outline:
 
 
 ## Templates
+Templates are externalized rules that describe the type of meta data to be assigned
+to matching URLs.  
+
+### YAML Config
+The templates configuration file can be found at /app/templates.yaml. The internal
+format of template.yaml file follows [YAML](http://yaml.org/refcard.html) and is implemented
+using the [PyYAML library](https://pyyaml.org). Only basic features of YAML are used, for example:
+
+templates.yaml
+```
+    - name: Press Release
+      search:
+        type: Source URL
+        contains: prnewswire.com
+      meta:
+        source: PR News Wire
+        source-type: Press Release
+        association: No
+        source-sector: News     
+``` 
+
+\- (hyphen) means a new template record
+
+  (indent) is like python syntax in that is means the content underneath belongs to the new record
+
+[to do]
+
+### Template Types
+At the time of this writing, there are only 2 supported types of  
+
 [ to do ]
