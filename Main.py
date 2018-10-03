@@ -69,14 +69,13 @@ for website_referral in website_referrals:
         print('     ' + str(result))
     print()
 
-    # Append the results (could be more then 1 row) to the master list
+    # Append the results (could be more than 1 row) to the master list
     website_referral_results.extend(results)
 
 
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 # Export Results to CSV
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-print('Writing results to ' + 'test-results.csv')
 file_io.write_new_csv(website_referrals_file, website_referral_results)
 
 

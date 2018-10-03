@@ -20,6 +20,8 @@ def get_csv(csv_file_name):
 
 def write_new_csv(original_file_name, dictionary_list):
     new_file_name = _create_new_file_name(original_file_name)
+    print('Writing results to ' + new_file_name)
+
     column_headers = _get_dictionary_keys(dictionary_list)
     with open(new_file_name, mode='w') as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=column_headers)
