@@ -53,7 +53,7 @@ def _clean_txt_file(filename):
 
     cleaned_txt = clean_txt(raw_txt)
 
-    with open(filename, 'w', encoding='utf-8') as txt_file:
+    with open(filename, 'w', encoding='utf-8', newline='') as txt_file:
         txt_file.write(cleaned_txt)
 
 
