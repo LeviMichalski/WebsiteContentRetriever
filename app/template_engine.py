@@ -7,6 +7,7 @@
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 import re
 import yaml
+from app import file_io
 from app import web_io
 
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
@@ -20,7 +21,9 @@ _TEMPLATE_WEBSITE_LINK = 'Website Link'
 # INITIALIZE: Load the templates into a local cache so that they are only loaded
 # once per program execution
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-with open('./app/templates.yaml', 'r') as templates_file:
+templates_file_path = file_io.get_file_path('templates.yaml')
+
+with open(templates_file_path, 'r') as templates_file:
     _TEMPLATE_CACHE = yaml.load(templates_file)
 
 

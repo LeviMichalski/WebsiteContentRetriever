@@ -6,12 +6,23 @@
 import re
 import csv
 import datetime
+import os.path
+
+
+def get_file_path(filename):
+    file_path = './'
+    if os.path.isfile('~/templates.yaml'):
+        file_path = '~/'
+    elif os.path.isfile('~/WebsiteContentRetriever/templates.yaml'):
+        file_path = '~/WebsiteContentRetriever/'
+
+    return file_path + filename
 
 
 def get_csv(csv_file_name):
     _clean_txt_file(csv_file_name)
 
-    with open(csv_file_name, 'r', encoding='utf-8') as csv_file:
+    with open(csv_file_name, 'r', encoding='utf-8', newline='') as csv_file:
         reader = csv.reader(csv_file)
         csv_rows = list(reader)
 
