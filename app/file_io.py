@@ -37,12 +37,12 @@ def clean_txt(raw_txt):
 
 
 def _clean_txt_file(filename):
-    with open(filename, 'r', encoding='latin-1') as txt_file:
+    with open(filename, 'r') as txt_file:
         raw_txt = txt_file.read()
 
     cleaned_txt = clean_txt(raw_txt)
 
-    with open(filename, 'w', encoding='utf-8') as txt_file:
+    with open(filename, 'w') as txt_file:
         txt_file.write(cleaned_txt)
 
 
