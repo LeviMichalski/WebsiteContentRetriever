@@ -16,7 +16,7 @@
   meta:
     source: PR News Wire
     source-type: Press Release
-    association: No
+    association: 'No
     source-sector: News
 
 - name: FMI Home Page

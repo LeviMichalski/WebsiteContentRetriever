@@ -4,6 +4,7 @@
 # Contains the logic for accessing and parsing websites for information
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 import re
+from app import file_io
 from requests import RequestException
 from requests_html import HTMLSession
 
@@ -49,7 +50,7 @@ def get_website(url):
         try:
             page_title = page.html.find('head > title', first=True)
             if page_title:
-                attributes['title'] = page_title.text
+                attributes['title'] = file_io.clean_txt(page_title.text)
 
             page_links = page.html.absolute_links
             if page_links:
