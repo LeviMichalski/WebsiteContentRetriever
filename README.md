@@ -10,7 +10,11 @@ is originating from.
 ## Setup & Go
 Requirements
   * Git @ https://git-scm.com
+    - Download the latest version from the home page
+    - If there is an option to add 'git' to the PATH, then choose to do so
   * Python 3.7 or higher @ https://www.python.org/downloads/
+    - Download the latest version from the home page
+    - Windows: Make sure to choose the option to add Python to the PATH on the first Setup Wizard screen.
   * pip - Python package installer (comes with Python >=3.4) 
 
 These instructions will assume execution from an OS terminal console
@@ -121,11 +125,11 @@ Templates are externalized rules that describe the type of meta data to be assig
 to matching URLs.  
 
 ### YAML Config
-The templates configuration file can be found at /app/templates.yaml. The internal
-format of template.yaml file follows [YAML](http://yaml.org/refcard.html) and is implemented
-using the [PyYAML library](https://pyyaml.org). Only basic features of YAML are used, for example:
+The default templates configuration file can be found in the root folder of the project in the file _templates.yaml_. 
+The internal format of _template.yaml_ file follows [YAML](http://yaml.org/refcard.html). The expected structure of
+the _templates.yaml_ file is a list of templates. For example: 
 
-templates.yaml
+_templates.yaml_
 ```
     - name: Press Release
       search:
@@ -135,16 +139,152 @@ templates.yaml
         source: PR News Wire
         source-type: Press Release
         association: No
-        source-sector: News     
+        source-sector: News
+        
+    - name: FMI Home Page
+      search:
+        type: Website Link
+        contains: fminet.com$, fminet.com/$
+      meta:
+        link-location: Homepage             
 ``` 
 
-\- (hyphen) means a new template record
+A list item in YAML syntax is defined with a hyphen (-) followed by the first attribute of the 
+list item (aka template), which is "name". Additional attributes of the template are 
+preceded with an indent and then the attribute name. An indent in YAML indicates that the next attribute
+is associated with the template definition. 
 
-  (indent) is like python syntax in that is means the content underneath belongs to the new record
+> NOTE: If any other YAML configuration is followed, the application will either ignore the extra attributes
+or fail to start if expected attributes are not found.  
 
-[to do]
+### Template Attributes
+Each template definition has the 3 primary attributes: name, search, meta.
 
-### Template Types
-At the time of this writing, there are only 2 supported types of  
+#### name
+The name of the template. This name is not used within the application for any purpose other than
+to for readers of template.yaml to identify different templates. This name field can contain any name of any length.
 
-[ to do ]
+    - name: This is my descriptive name
+
+#### search
+The search attribute of a template only contains sub-attributes that define the "type" of search
+and what the search "contains" for a successful match.
+
+##### type: Source URL
+
+This type of search will examine the source URL found within the CSV input file. In circumstances where
+the source URL contains a domain name that is common, there is no need to examine the contents of the 
+website to know what default meta data to apply to the URL. 
+
+For example, if all press releases are posted to 'prnewswire.com', then the meta data can be applied immediately to 
+that source URL without examining the contents of the prnewswire.com website URL. 
+
+    - name: Press Release (prnewswire.com)
+      search: 
+        type: Source URL
+        contains: prnewswire.com
+
+##### type: Website Link
+
+A Website Link search will examine all of the links found within the website of the source URL from the CSV file. This
+search will first access the website of the source URL from the CSV file, download it, extract out all of the links, 
+then check to see if the links match this type of template. 
+
+    - name: FMI Home Page
+      search: 
+        type: Website Link
+        contains: fminet.com$, fminet.com/$
+ 
+ If the website link matches the 'contains' search attribute, then it will match this template. 
+ 
+##### contains
+ 
+The search 'contains' attribute defines the search criteria that must match in order for the template meta data to be
+applied to the website link. 
+
+This attribute can contain multiple search criteria by separating them with a comma. 
+
+Each search criteria defined can utilize the 
+[Regular Expression](https://www.rexegg.com/regex-quickstart.html) matching syntax. While this syntax can take a while
+to become familiar, there are many [online tutorials](https://www.regular-expressions.info/tutorial.html) and 
+[testing tools](https://www.regextester.com) to assist the learning process.   
+
+Example:
+  
+    - name: FMI Home Page
+      search: 
+        type: Website Link
+        contains: fminet.com$, fminet.com/$
+ 
+The 'contains' attribute contains 2 search match possibilities and utilizes a few regex symbols. The first match
+possibility is 'fminet.com$' and will match any website link that ends with ($) "fminet.com". The second match
+possibility is 'fminet.com/$' and will match any website link that ends with ($) "fminet.com/". In this scenario,
+some website links might contain a trailing forward slash, which is equivalent to a link that doesn't have the forward
+slash.  
+
+
+#### meta
+The meta attribute contains data that will be associated with any URL/Link that matches the search. There
+are no defined meta data attributes. Whatever is placed within the meta section will be converted into columns
+within the CSV output results. 
+
+For example:
+
+```
+    - name: Press Release
+      search:
+        type: Source URL
+        contains: prnewswire.com
+      meta:
+        source: PR News Wire
+        source-type: Press Release
+        association: No
+        source-sector: News
+        
+    - name: FMI Home Page
+      search:
+        type: Website Link
+        contains: fminet.com$, fminet.com/$
+      meta:
+        link-location: Homepage             
+``` 
+
+If there are 2 results and one matches the first template and the other matches the second template, then the CSV results
+file will contain the following columns:
+
+| url                   | source       | source-type   | association | source-sector | link-location |
+|-----------------------|--------------|---------------|-------------|---------------|---------------|
+| http://prnewswire.com | PR News Wire | Press Release | No          | News          |               |
+| http://fminet.com     | FMI          |               |             |               | Homepage      |
+
+The final CSV results will contain a column for each of the meta data found within the _template.yaml_ file regardless
+ of whether the meta data matched a URL/Link. CSV results files that contain the same exact columns for each program
+ execution will be easier to compare.  
+
+#### Computed Results
+The following columns will be added to the CSV results for each URL that matched a template. 
+
+  * **url_status**: the [HTTP Status](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) response code of the Source URL from the CSV file
+  * **content_link**: the matching link found within the source URL website content
+  * **content_link_status**: the [HTTP Status](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) response code of the website content link
+  * **source**: the website page title of the root domain of the source URL or website link. This value can be overridden by specifying it in the meta data of the template.
+  * **error**: any error message that was generated while processing the source URL record 
+
+### _templates.yaml_ locations
+The default location for the _templates.yaml_ file is in the root project folder. You can choose to
+modify the _templates.yaml_ file in the root project folder, but the changes will be overwritten any
+time the project is updated through Git. Alternatively, your team can choose to commit all changes
+to Git for sharing with team members and permanent storage.
+
+To personalize your templates without affecting the Git source code, this application will first look
+for the _templates.yaml_ file in the following locations:
+ 
+    1. HOME_FOLDER/templates.yaml
+    2. HOME_FOLDER/WebsiteContentRetriever/templates.yaml
+    3. PROJECT_ROOT_FOLDER/templates.yaml   
+
+For example, if on a Windows 10 machine, the _templates.yaml_ lookup path for me would be:
+
+    1. C:\Users\Tim Michalski\templates.yaml
+    2. C:\Users\Tim Michalski\WebsiteContentRetriever\templates.yaml
+    3. C:\Users\Tim Michalski\Documents\python-workspace\WebsiteContentRetriever\templates.yaml

@@ -69,8 +69,8 @@ def _get_website_link_matches(url, meta_prefix):
         if template_meta:
             # TODO: append the 'fmi_link' to an existing record if the template is the same
             template_meta['url_status'] = source_website.get('status_code')
-            template_meta['fmi_link'] = website_link
-            template_meta['fmi_link_status'] = web_io.get_website_status(website_link)
+            template_meta['content_link'] = website_link
+            template_meta['content_link_status'] = web_io.get_website_status(website_link)
             matches.append(template_meta)
 
     return matches
@@ -84,20 +84,31 @@ def _get_templates(template_name):
     return templates
 
 
+def _get_template_meta_keys():
+    keys = []
+    for template in _TEMPLATE_CACHE:
+        meta = template.get('meta')
+        if meta:
+            keys.extend(meta.keys())
+    return keys
+
+
 def _match(templates, url, meta_prefix):
     for template in templates:
         search_criteria = template['search']['contains'].split(',')
         if _search(url, search_criteria):
             match = {**meta_prefix}
 
-            if template.get('meta'):
-                match['source'] = template['meta'].get('source')
-                match['source-type'] = template['meta'].get('source-type')
-                match['association'] = template['meta'].get('association')
-                match['source-sector'] = template['meta'].get('source-sector')
-                match['fmi-content-type'] = template['meta'].get('fmi-content-type')
-                match['fmi-content-title'] = template['meta'].get('fmi-content-title')
-                match['link-location'] = template['meta'].get('link-location')
+            meta = template.get('meta')
+            if meta:
+                # Iterate through all of the known template meta data to build out an identical record for every
+                # URL. This will ensure that the CSV output always has the same columns in the same order for every
+                # execution of this program.
+                for meta_key in _get_template_meta_keys():
+                    if meta.get(meta_key):
+                        match[meta_key] = meta.get(meta_key)
+                    else:
+                        match[meta_key] = ''
 
             return match
 
