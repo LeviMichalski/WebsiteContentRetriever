@@ -48,10 +48,17 @@ def get_website(url):
 
     if 200 == page.status_code:
         try:
+            # Title
             page_title = page.html.find('head > title', first=True)
             if page_title:
                 attributes['title'] = file_io.clean_txt(page_title.text)
 
+            # Meta Keywords
+            meta_tags = page.html.find('head > meta')
+            if meta_tags:
+                _append_meta_tags(attributes, meta_tags)
+
+            # Links
             page_links = page.html.absolute_links
             if page_links:
                 attributes['links'] = page_links
@@ -80,3 +87,17 @@ def get_website_status(url):
         return 500
 
     return page.status_code
+
+
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+# Private methods
+# ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+def _append_meta_tags(attributes, meta_tags):
+    for tag in meta_tags:
+        if tag.attrs.get('name'):
+            tag_name = tag.attrs.get('name').strip().lower()
+            if 'description' == tag_name:
+                attributes['meta-description'] = file_io.clean_txt(tag.attrs.get('content'))
+            elif 'keywords' == tag_name:
+                attributes['meta-keywords'] = file_io.clean_txt(tag.attrs.get('content'))

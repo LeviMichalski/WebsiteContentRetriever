@@ -13,33 +13,29 @@ WEBSITE_REFERRAL_COL_URL = 2
 
 
 def lookup(website_referral):
-    # Get the Website Source URL
-    website_url = website_referral[WEBSITE_REFERRAL_COL_URL]
+    # Get the URL
+    source_url = website_referral[WEBSITE_REFERRAL_COL_URL]
+
+    # Get the Source website content meta
+    source_meta = web_io.get_website(source_url)
+    source_title = web_io.get_website_source(source_url)
+
+    #   TODO source-type: searches the source URL for terms like "news", "blog", and defaults to "website"
 
     # Prefix meta records with these values
     meta_prefix = {
-        'published_date': website_referral[WEBSITE_REFERRAL_COL_PUBLISHED],
+        'published-date': website_referral[WEBSITE_REFERRAL_COL_PUBLISHED],
         'title': website_referral[WEBSITE_REFERRAL_COL_TITLE],
-        'url': website_url
+        'url': source_url,
+        'source': source_title,
+        'meta-description': source_meta.get('meta-description'),
+        'meta-keywords': source_meta.get('meta-keywords')
     }
 
     # Get static meta data from the template engine
-    website_meta_records = template_engine.find_matches(website_url, meta_prefix)
+    website_meta_records = template_engine.find_matches(source_url, meta_prefix)
     if not website_meta_records:
         error_record = {'error': 'No template matched'}
         return [{**meta_prefix, **error_record}]
-
-    # Get the base website Source
-    website_source = web_io.get_website_source(website_url)
-
-    # Apply dynamic website meta data
-    for website_meta in website_meta_records:
-
-        # Source
-        if not website_meta.get('source'):
-            website_meta['source'] = website_source
-
-        #   TODO source-type: searches the source URL for terms like "news", "blog", and defaults to "website"
-        #   TODO keywords: get from website content (look up the standard way of adding keywords)
 
     return website_meta_records
