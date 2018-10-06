@@ -1,13 +1,30 @@
-# Template 'meta' defaults
-#   source: gets the <title> from the root domain home page
-#   source-type: searches the source URL for terms like "news", "blog", and defaults to "website"
-#   association: no
-#   source-sector: <blank>
-#   fmi-content-type: <blank>
-#   fmi-content-title: <blank>
-#   link-status: validates that the FMI link is active (HTTP 200)
-#   link-location: <blank>
-#   keywords: get from website content (look up the standard way of adding keywords)
+# templates.yaml
+#
+# This file expects a list of template records in the following YAML format.
+# See the README.md file in the root project folder for explanations of these attributes.
+#
+# EXAMPLE:
+#
+# - name: Press Releases
+#  search:
+#    type: Source URL
+#    contains: prnewswire.com
+#  meta:
+#    source: PR News Wire
+#    source-type: Press Release
+#    association: 'No'
+#    source-sector: News
+#
+# - name: FMI Home Page
+#  search:
+#    type: Website Link
+#    contains: fminet.com$, fminet.com/$
+#  meta:
+#    link-location: Homepage
+#
+#
+# !!! WARNING !!! Any other format may cause this program to fail.
+#
 
 - name: Press Releases
   search:
@@ -67,4 +84,3 @@
     type: Website Link
     contains: fminet.com
   meta:
-
