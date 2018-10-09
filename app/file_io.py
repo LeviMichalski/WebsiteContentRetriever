@@ -44,7 +44,9 @@ def write_new_csv(original_file_name, dictionary_list):
 
 
 def clean_txt(raw_txt):
-    return re.sub('[^a-zA-Z0-9\n\.\-"\',/|!@#$%^&*()[\]{}:?/+=_\\\]', ' ', raw_txt).strip()
+    if raw_txt:
+        return re.sub('[^a-zA-Z0-9\n\.\-"\',/|!@#$%^&*()[\]{}:?/+=_\\\]', ' ', raw_txt).strip()
+    return raw_txt
 
 
 def _clean_txt_file(filename):
