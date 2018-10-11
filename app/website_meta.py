@@ -27,6 +27,7 @@ def lookup(website_referral):
         'published-date': website_referral[WEBSITE_REFERRAL_COL_PUBLISHED],
         'title': website_referral[WEBSITE_REFERRAL_COL_TITLE],
         'url': source_url,
+        'url_status': source_meta.get('status_code'),
         'source': source_title,
         'meta-description': source_meta.get('meta-description'),
         'meta-keywords': source_meta.get('meta-keywords')

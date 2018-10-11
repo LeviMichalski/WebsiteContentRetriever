@@ -34,10 +34,22 @@ with open(templates_file_path, 'r') as templates_file:
 # multiple website links that match.
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 def find_matches(url, meta_prefix):
-    matches = _get_source_url_matches(url, meta_prefix)
+    matches = []
 
-    if not matches:
-        matches = _get_website_link_matches(url, meta_prefix)
+    source_match = _get_source_url_match(url, meta_prefix)
+    if source_match:
+        # Copy the meta data from the source match down into its website links. The
+        # website links will have the opportunity to overwrite these values.
+        meta_prefix = {**meta_prefix, **source_match}
+
+    # Get the website link matches. Return either the website link matches if found,
+    # or default to the source match. Only return one or the other to reduce duplicates
+    # since the website link matches contain all of the same info as the source_match.
+    link_matches = _get_website_link_matches(url, meta_prefix)
+    if link_matches:
+        matches.extend(link_matches)
+    elif source_match:
+        matches.append(source_match)
 
     return matches
 
@@ -47,11 +59,12 @@ def find_matches(url, meta_prefix):
 # These functions should only be used within this file
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-def _get_source_url_matches(url, meta_prefix):
+def _get_source_url_match(url, meta_prefix):
     source_url_templates = _get_templates(_TEMPLATE_SOURCE_URL)
-    template_meta = _match(source_url_templates, url, meta_prefix)
-    if template_meta:
-        return [template_meta]  # Return as a list
+    source_match = _match(source_url_templates, url, meta_prefix)
+    if not source_match:
+        source_match = {}
+    return source_match
 
 
 def _get_website_link_matches(url, meta_prefix):
@@ -67,8 +80,6 @@ def _get_website_link_matches(url, meta_prefix):
     for website_link in website_links:
         template_meta = _match(website_link_templates, website_link, meta_prefix)
         if template_meta:
-            # TODO: append the 'fmi_link' to an existing record if the template is the same
-            template_meta['url_status'] = source_website.get('status_code')
             template_meta['content_link'] = website_link
             template_meta['content_link_status'] = web_io.get_website_status(website_link)
             matches.append(template_meta)
@@ -107,7 +118,7 @@ def _match(templates, url, meta_prefix):
                 for meta_key in _get_template_meta_keys():
                     if meta.get(meta_key):
                         match[meta_key] = meta.get(meta_key)
-                    else:
+                    elif not match.get(meta_key):
                         match[meta_key] = ''
 
             return match

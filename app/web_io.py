@@ -9,6 +9,11 @@ from requests import RequestException
 from requests_html import HTMLSession
 
 
+# Store all website details in a local cache so that multiple calls can be made to
+# the same URL without making duplicate calls and slowing down the app
+_WEBSITE_CACHE = {}
+
+
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 # Get Website Source
 # Look up the root domain of the given URL and fetch the title of the home page.
@@ -30,6 +35,9 @@ def get_website_source(url):
 # Download the website and pull out meaningful data
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 def get_website(url):
+    if _WEBSITE_CACHE.get(url):
+        return _WEBSITE_CACHE.get(url)
+
     session = HTMLSession()
 
     try:
@@ -43,10 +51,11 @@ def get_website(url):
         }
 
     attributes = {
-        'status_code': page.status_code
+        'status_code': page.status_code,
+        'content-type': page.headers.get('content-type')
     }
 
-    if 200 == page.status_code:
+    if 200 == page.status_code and page.headers.get('content-type').find('html') > -1:
         try:
             # Title
             page_title = page.html.find('head > title', first=True)
@@ -73,6 +82,8 @@ def get_website(url):
         attributes['title'] = ''
         attributes['links'] = []
 
+    _WEBSITE_CACHE[url] = attributes
+
     return attributes
 
 
@@ -80,13 +91,8 @@ def get_website(url):
 # Get Website Status
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 def get_website_status(url):
-    session = HTMLSession()
-    try:
-        page = session.get(url)
-    except RequestException:
-        return 500
-
-    return page.status_code
+    website = get_website(url)
+    return website.get('status_code')
 
 
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~

@@ -25,6 +25,7 @@
 
 import sys
 import time
+import os.path
 from app import file_io
 from app import website_meta
 
@@ -48,6 +49,10 @@ if len(sys.argv) == 1:
     quit()
 
 website_referrals_file = sys.argv[1]
+
+if not os.path.isfile(website_referrals_file):
+    print("ERROR: Could not find the file " + website_referrals_file)
+    quit()
 
 
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
