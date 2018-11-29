@@ -9,20 +9,6 @@
 # GitHub: https://github.com/LeviMichalski/WebsiteContentRetriever
 # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-# !! WARNING !!   -- Tim Michalski  9/24/2018
-# A known issue exists where this program will fail when a CSV file contains
-# Microsoft specific double quote characters.
-#
-# For example: “Musts”
-#
-# The begin and end quotes are not unicode and will throw an exception. Before
-# creating a CSV file, consider doing a find and replace on the file for these
-# begin and end quotes and replace with a single quote like '
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-
 import sys
 import time
 import os.path

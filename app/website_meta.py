@@ -20,7 +20,7 @@ def lookup(website_referral):
     source_meta = web_io.get_website(source_url)
     source_title = web_io.get_website_source(source_url)
 
-    #   TODO source-type: searches the source URL for terms like "news", "blog", and defaults to "website"
+    # TODO source-type: searches the source URL for terms like "news", "blog", and defaults to "website"
 
     # Prefix meta records with these values
     meta_prefix = {
