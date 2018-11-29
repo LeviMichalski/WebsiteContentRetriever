@@ -56,8 +56,12 @@ for website_referral in website_referrals:
     print(str(record_count) + '. ' + website_referral[_TITLE])
 
     results = website_meta.lookup(website_referral)
-    for result in results:
-        print('     ' + str(result))
+    if results:
+        for result in results:
+            print('     ' + str(result))
+    else:
+        print(' !!!!   NO RESULTS FOUND   !!!!')
+
     print()
 
     # Append the results (could be more than 1 row) to the master list
